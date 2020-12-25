@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 /*
@@ -25,7 +26,7 @@ public class output extends javax.swing.JFrame {
     /**
      * Creates new form output
      */
-    public output(String tital, String des, String urls) throws MalformedURLException {
+    public output(String tital, String des, String urls, ImageIcon img) throws MalformedURLException {
         initComponents();
 
         jLabel1.setText(tital);
@@ -33,6 +34,9 @@ public class output extends javax.swing.JFrame {
         jLabel1.setForeground(Color.BLUE.darker());
         jLabel1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         url = urls;
+        if (img != null) {
+            jLabel2.setIcon(img);
+        }
 
     }
 
