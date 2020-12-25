@@ -13,6 +13,8 @@ import java.net.URL;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
@@ -124,11 +126,11 @@ public class MainForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Title ", "description ", "", ""
+                "Title ", "description ", "", "", "imagepath"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, true, true
+                false, false, true, true, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -153,6 +155,9 @@ public class MainForm extends javax.swing.JFrame {
             jTable1.getColumnModel().getColumn(3).setMinWidth(0);
             jTable1.getColumnModel().getColumn(3).setPreferredWidth(0);
             jTable1.getColumnModel().getColumn(3).setMaxWidth(0);
+            jTable1.getColumnModel().getColumn(4).setMinWidth(0);
+            jTable1.getColumnModel().getColumn(4).setPreferredWidth(0);
+            jTable1.getColumnModel().getColumn(4).setMaxWidth(0);
         }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -194,63 +199,71 @@ public class MainForm extends javax.swing.JFrame {
         if (evt.getKeyCode() == 10) {
 
             try {
-                mainApi obj = convert_json_to_java(jTextField1.getText().replaceAll("\\s+", "+"));
+                jTextPane1.setText("");
+                mainApi obj;
+                obj = convert_json_to_java(jTextField1.getText().replaceAll("\\s+", "+"));
                 if (!obj.getAnswers().isEmpty()) {
                     for (int i = 0; i < obj.getAnswers().size(); i++) {
                         jTextPane1.setText(jTextPane1.getText() + "\n" + obj.getAnswers().get(i));
 
                     }
+                    if (!obj.getResults().isEmpty()) {
+                        fillTable(obj);
+                    }
 
                 }
                 this.getContentPane().setLayout(new FlowLayout());
-                for (int j = 0; j < obj.getResults().size(); j++) {
 
-                    Vector row = new Vector();
-
-                    row.add(obj.getResults().get(j).getTitle());
-                    row.add(obj.getResults().get(j).getDescription());
-                    row.add(obj.getResults().get(j).getLink());
-                    if (!obj.getImageResults().isEmpty()) {
-                        row.add(obj.getImageResults().get(0));
-                    }
-                    DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-                    model.addRow(row);
-
-                }
             } catch (Exception ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }//GEN-LAST:event_jTextField1KeyPressed
+    public void fillTable(mainApi obj) {
+        jTable1.removeAll();
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        for (int j = 0; j < obj.getResults().size(); j++) {
 
-    private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
-         try {
-                mainApi obj = convert_json_to_java(jTextField1.getText().replaceAll("\\s+", "+"));
-                if (!obj.getAnswers().isEmpty()) {
-                    for (int i = 0; i < obj.getAnswers().size(); i++) {
-                        jTextPane1.setText(jTextPane1.getText() + "\n" + obj.getAnswers().get(i));
+            Vector row = new Vector();
 
-                    }
+            row.add(obj.getResults().get(j).getTitle());
+            row.add(obj.getResults().get(j).getDescription());
+            row.add(obj.getResults().get(j).getLink());
+            if (obj.getImageResults().size() > 0) {
+                row.add(obj.getImageResults().get(0));
+            } else {
+                row.add("");
 
-                }
-                this.getContentPane().setLayout(new FlowLayout());
-                for (int j = 0; j < obj.getResults().size(); j++) {
-
-                    Vector row = new Vector();
-
-                    row.add(obj.getResults().get(j).getTitle());
-                    row.add(obj.getResults().get(j).getDescription());
-                    row.add(obj.getResults().get(j).getLink());
-                    if (!obj.getImageResults().isEmpty()) {
-                        row.add(obj.getImageResults().get(0));
-                    }
-                    DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-                    model.addRow(row);
-
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }
+            if (!obj.getImageResults().isEmpty()) {
+                row.add(obj.getImageResults().get(0));
+            }
+
+            model.addRow(row);
+
+        }
+
+    }
+    private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
+        try {
+            jTextPane1.setText("");
+            mainApi obj;
+
+            obj = convert_json_to_java(jTextField1.getText().replaceAll("\\s+", "+"));
+            if (!obj.getAnswers().isEmpty()) {
+                for (int i = 0; i < obj.getAnswers().size(); i++) {
+                    jTextPane1.setText(jTextPane1.getText() + "\n" + obj.getAnswers().get(i));
+
+                }
+
+            }
+            this.getContentPane().setLayout(new FlowLayout());
+            if (!obj.getResults().isEmpty()) {
+                fillTable(obj);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jLabel2MouseClicked
 
     private void jTable1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseReleased
@@ -262,10 +275,27 @@ public class MainForm extends javax.swing.JFrame {
             if (model.getValueAt(jTable1.getSelectedRow(), 2).toString() != "") {
                 url = model.getValueAt(jTable1.getSelectedRow(), 2).toString();
             }
+            ImageIcon img = null;
+            URL imageurl = null;
+
+            try {
+                if (!model.getValueAt(jTable1.getSelectedRow(), 3).toString().equalsIgnoreCase("")) {
+                    imageurl = new URL(model.getValueAt(jTable1.getSelectedRow(), 3).toString());
+                    img = new ImageIcon(imageurl);
+                } else {
+                    imageurl = null;
+
+                }
+
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            
 
             output app;
             try {
-                app = new output(tital, des, url);
+                app = new output(tital, des, url, img);
                 app.show(true);
             } catch (MalformedURLException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -317,7 +347,7 @@ public class MainForm extends javax.swing.JFrame {
     public static mainApi convert_json_to_java(String q) throws Exception {
         // 96af9118eee01b40b10f8787b486f9a4
 
-        String url = "https://rapidapi.p.rapidapi.com/api/v1/search/q=" + q + "&num=100";
+        String url = "https://rapidapi.p.rapidapi.com/api/v1/search/q=" + q + "&num=30";
 
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
